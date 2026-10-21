@@ -30,7 +30,10 @@ def create_app(): #instead of creating the app globally, you create it inside a 
 
     from app.models.user import User 
     from app.routes.test import test
+    from app.models.workflow import Workflow
+    from app.routes.workflows import workflows_bp
 
     app.register_blueprint(test)
+    app.register_blueprint(workflows_bp)
 
     return app #returns the fully configured flask app instance
