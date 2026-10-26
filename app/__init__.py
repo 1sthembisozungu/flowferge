@@ -35,6 +35,7 @@ def create_app(): #instead of creating the app globally, you create it inside a 
     from app.models.workflow_step import WorkflowStep 
     from app.routes.workflow_steps import workflow_steps_bp 
     from app.routes.executions import executions_bp
+    from app.models.workflow_execution import WorkflowExecution
 
 
     app.register_blueprint(test)
