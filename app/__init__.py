@@ -36,12 +36,14 @@ def create_app(): #instead of creating the app globally, you create it inside a 
     from app.routes.workflow_steps import workflow_steps_bp 
     from app.routes.executions import executions_bp
     from app.models.workflow_execution import WorkflowExecution
+    from app.routes.dashboard import dashboard_bp
 
 
     app.register_blueprint(test)
     app.register_blueprint(workflows_bp)
     app.register_blueprint(workflow_steps_bp) 
     app.register_blueprint(executions_bp)
+    app.register_blueprint(dashboard_bp)
 
 
     #adding a new blueprint connects the new endpoint to your application

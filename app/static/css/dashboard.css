@@ -1,0 +1,448 @@
+
+/* 1. Reset default browser spacing */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* 2. Colours and reusable values */
+:root {
+    --background: #f5f7fb;
+    --surface: #ffffff;
+    --sidebar: #172033;
+    --text: #202b3c;
+    --muted: #778195;
+    --border: #e4e8f0;
+    --primary: #5b5ce2;
+    --primary-hover: #4849c7;
+    --success: #16845b;
+    --success-bg: #e5f7ef;
+    --danger: #b42318;
+    --danger-bg: #feeceb;
+}
+
+/* 3. Overall page */
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--background);
+    color: var(--text);
+    line-height: 1.5;
+}
+
+.app-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* 4. Sidebar */
+.sidebar {
+    width: 245px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--sidebar);
+    color: #ffffff;
+    padding: 28px 18px;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 42px;
+    padding-left: 8px;
+}
+
+.brand-icon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--primary);
+}
+
+.navigation {
+    display: grid;
+    gap: 8px;
+}
+
+.nav-link {
+    display: block;
+    padding: 12px 14px;
+    color: #c3cada;
+    text-decoration: none;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    color: #ffffff;
+    background: #303b53;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 18px 8px 0;
+    color: #aab4c7;
+    font-size: 12px;
+}
+
+/* 5. Main content and page header */
+.main-content {
+    flex: 1;
+    min-width: 0;
+    padding: 36px;
+}
+
+.topbar,
+.section-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.eyebrow {
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    margin-bottom: 8px;
+}
+
+h1 {
+    font-size: 30px;
+    line-height: 1.2;
+}
+
+.subtitle,
+.section-heading p {
+    color: var(--muted);
+    font-size: 14px;
+    margin-top: 6px;
+}
+
+.system-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success);
+}
+
+/* 6. Sections and overview cards */
+.section {
+    margin-top: 32px;
+}
+
+.section h2 {
+    font-size: 18px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 16px;
+}
+
+.stat-card,
+.panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+.stat-card {
+    padding: 22px;
+}
+
+.stat-card p {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.stat-card h3 {
+    font-size: 30px;
+    margin: 12px 0 4px;
+}
+
+.stat-card span {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.panel {
+    padding: 24px;
+}
+
+.section-heading {
+    margin-bottom: 20px;
+}
+
+/* 7. Workflow list */
+.workflow-list {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.workflow-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+}
+
+.workflow-card h3 {
+    font-size: 15px;
+}
+
+.workflow-card p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.workflow-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* 8. Status labels */
+.status {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: capitalize;
+}
+
+.status-active,
+.status-completed {
+    background: var(--success-bg);
+    color: var(--success);
+}
+
+.status-inactive,
+.status-failed {
+    background: var(--danger-bg);
+    color: var(--danger);
+}
+
+.status-running,
+.status-skipped {
+    background: #fff4d6;
+    color: #865c00;
+}
+
+/* 9. Form fields */
+#execution-form {
+    display: grid;
+    gap: 10px;
+    max-width: 650px;
+}
+
+#execution-form label {
+    margin-top: 8px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d7dce6;
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--text);
+    font: inherit;
+    font-size: 14px;
+}
+
+textarea {
+    resize: vertical;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: 2px solid #dadaff;
+    border-color: var(--primary);
+}
+
+/* 10. Buttons */
+.button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 15px;
+    border: 0;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.primary {
+    background: var(--primary);
+    color: #ffffff;
+}
+
+.primary:hover:not(:disabled) {
+    background: var(--primary-hover);
+}
+
+.secondary {
+    background: #eef0ff;
+    color: var(--primary);
+}
+
+/* 11. Messages and execution result */
+.message {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.result-box {
+    margin-top: 22px;
+    padding: 16px;
+    background: #f7f8fc;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.result-box h3 {
+    margin-bottom: 10px;
+    font-size: 15px;
+}
+
+.result-box pre {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    font-size: 12px;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+/* 12. Execution history table */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 13px;
+}
+
+th,
+td {
+    padding: 14px 12px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+th {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.page-footer {
+    padding: 28px 0 8px;
+    color: var(--muted);
+    font-size: 12px;
+}
+
+/* 13. Adapt the layout to smaller screens */
+@media (max-width: 900px) {
+    .main-content {
+        padding: 24px;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 600px) {
+    .app-layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        padding: 18px;
+    }
+
+    .brand {
+        margin-bottom: 18px;
+    }
+
+    .navigation {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .sidebar-footer {
+        margin-top: 18px;
+    }
+
+    .main-content {
+        padding: 20px 14px;
+    }
+
+    .topbar,
+    .section-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .system-status {
+        white-space: normal;
+    }
+
+    .panel {
+        padding: 16px;
+    }
+
+    .workflow-card,
+    .workflow-meta {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}

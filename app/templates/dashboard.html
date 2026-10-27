@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FlowForge | Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+</head>
+
+<body>
+    <div class="app-layout">
+
+        <!-- Sidebar navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <span class="brand-icon">F</span>
+                <span>FlowForge</span>
+            </div>
+
+            <nav class="navigation">
+                <a href="#overview" class="nav-link active">Overview</a>
+                <a href="#workflows" class="nav-link">Workflows</a>
+                <a href="#test-workflow" class="nav-link">Test workflow</a>
+                <a href="#history" class="nav-link">Execution history</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                Personal workspace
+            </div>
+        </aside>
+
+        <!-- Main dashboard content -->
+        <main class="main-content">
+
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">WORKSPACE / OVERVIEW</p>
+                    <h1>Dashboard</h1>
+                    <p class="subtitle">
+                        Monitor and test your automated workflows.
+                    </p>
+                </div>
+
+                <span class="system-status">
+                    <span class="status-dot"></span>
+                    Local environment
+                </span>
+            </header>
+
+            <!-- Overview cards -->
+            <section id="overview" class="section">
+                <h2>Overview</h2>
+
+                <div class="stats-grid">
+                    <article class="stat-card">
+                        <p>Total workflows</p>
+                        <h3 id="total-workflows">—</h3>
+                        <span>Saved workflows</span>
+                    </article>
+
+                    <article class="stat-card">
+                        <p>Active workflows</p>
+                        <h3 id="active-workflows">—</h3>
+                        <span>Ready to run</span>
+                    </article>
+
+                    <article class="stat-card">
+                        <p>Total executions</p>
+                        <h3 id="total-executions">—</h3>
+                        <span>Recorded runs</span>
+                    </article>
+                </div>
+            </section>
+
+            <!-- Workflow list -->
+            <section id="workflows" class="section panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Your workflows</h2>
+                        <p>Workflows stored in your database.</p>
+                    </div>
+                    <button id="refresh-workflows" class="button secondary">
+                        Refresh
+                    </button>
+                </div>
+
+                <p id="workflow-message" class="message" role="status">
+                    Loading workflows...
+                </p>
+
+                <div id="workflow-list" class="workflow-list"></div>
+            </section>
+
+            <!-- Workflow testing form -->
+            <section id="test-workflow" class="section panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Test a workflow</h2>
+                        <p>Simulate an incoming email event.</p>
+                    </div>
+                </div>
+
+                <form id="execution-form">
+                    <label for="workflow-id">Workflow</label>
+                    <select id="workflow-id" name="workflow_id" required>
+                        <option value="">Select a workflow</option>
+                    </select>
+
+                    <label for="email-subject">Email subject</label>
+                    <input id="email-subject" name="subject" type="text" placeholder="e.g. Invoice from supplier"
+                        required>
+
+                    <label for="email-body">Email body</label>
+                    <textarea id="email-body" name="body" rows="4" placeholder="Enter the simulated email content..."
+                        required></textarea>
+
+                    <button id="execute-button" type="submit" class="button primary">
+                        Run workflow
+                    </button>
+                </form>
+
+                <div id="execution-result" class="result-box" hidden>
+                    <h3>Execution result</h3>
+                    <pre id="execution-result-content"></pre>
+                </div>
+            </section>
+
+            <!-- Execution history -->
+            <section id="history" class="section panel">
+                <div class="section-heading">
+                    <div>
+                        <h2>Execution history</h2>
+                        <p>Review previously recorded workflow runs.</p>
+                    </div>
+                    <button id="refresh-history" class="button secondary">
+                        Refresh history
+                    </button>
+                </div>
+
+                <p id="history-message" class="message" role="status">
+                    Select a workflow to view its history.
+                </p>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Execution ID</th>
+                                <th>Status</th>
+                                <th>Started</th>
+                                <th>Finished</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table-body"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <footer class="page-footer">
+                FlowForge · Personal workflow automation
+            </footer>
+
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
+</body>
+
+</html>
