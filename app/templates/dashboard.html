@@ -48,6 +48,12 @@
                     <span class="status-dot"></span>
                     Local environment
                 </span>
+
+
+                <form action="{{ url_for('auth.logout') }}" method="POST" class="logout-form">
+                    <button type="submit" class="logout-button">Log Out</button>
+                </form>
+
             </header>
 
             <!-- Overview cards -->
@@ -86,6 +92,33 @@
                         Refresh
                     </button>
                 </div>
+
+
+                <form id="create-workflow-form" class="create-workflow-form">
+                    <h3>Create a workflow</h3>
+                    <p>Give your new workflow a name and description.</p>
+
+                    <label for="new-workflow-name">Workflow name</label>
+                    <input id="new-workflow-name" name="name" type="text" maxlength="255"
+                        placeholder="e.g. Invoice Monitor" required>
+
+                    <label for="new-workflow-description">Description</label>
+                    <textarea id="new-workflow-description" name="description" rows="3"
+                        placeholder="Describe what this workflow should do."></textarea>
+
+                    <label for="new-workflow-status">Initial status</label>
+                    <select id="new-workflow-status" name="status" required>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+
+                    <button type="submit" id="create-workflow-button" class="button primary">
+                        Create workflow
+                    </button>
+
+                    <p id="create-workflow-message" class="message" role="status"></p>
+                </form>
+
 
                 <p id="workflow-message" class="message" role="status">
                     Loading workflows...

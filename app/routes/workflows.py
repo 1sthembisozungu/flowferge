@@ -1,8 +1,7 @@
 
-from flask import Blueprint, request, current_app
+from flask import Blueprint, request, current_app, session
 
 from app import db
-from app.models.user import User
 from app.models.workflow import Workflow
 
 
@@ -11,7 +10,18 @@ workflows_bp = Blueprint("workflows", __name__)
 
 @workflows_bp.route("/api/workflows", methods=["GET"])
 def get_workflows():
-    workflows = Workflow.query.order_by(
+    # Get the logged-in user's ID.
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return {
+            "error": "Authentication required. Please log in."
+        }, 401
+
+    # Return only workflows belonging to this user.
+    workflows = Workflow.query.filter_by(
+        user_id=user_id
+    ).order_by(
         Workflow.created_at.desc()
     ).all()
 
@@ -33,24 +43,30 @@ def get_workflows():
 
 @workflows_bp.route("/api/workflows", methods=["POST"])
 def create_workflow():
+    # Only logged-in users can create workflows.
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return {
+            "error": "Authentication required. Please log in."
+        }, 401
+
     data = request.get_json(silent=True)
 
     if not isinstance(data, dict):
         return {"error": "A JSON object is required."}, 400
 
-    user_id = data.get("user_id")
     name = data.get("name")
     description = data.get("description", "")
     status = data.get("status", "active")
-
-    if isinstance(user_id, bool) or not isinstance(user_id, int):
-        return {"error": "user_id must be an integer."}, 400
 
     if not isinstance(name, str) or not name.strip():
         return {"error": "A workflow name is required."}, 400
 
     if len(name.strip()) > 255:
-        return {"error": "Workflow name must be 255 characters or fewer."}, 400
+        return {
+            "error": "Workflow name must be 255 characters or fewer."
+        }, 400
 
     if not isinstance(description, str):
         return {"error": "description must be a string."}, 400
@@ -58,13 +74,9 @@ def create_workflow():
     if status not in ("active", "inactive"):
         return {"error": "status must be active or inactive."}, 400
 
-    user = db.session.get(User, user_id)
-
-    if user is None:
-        return {"error": "The specified user does not exist."}, 404
-
+    # Assign ownership using the authenticated session.
     workflow = Workflow(
-        user_id=user.id,
+        user_id=user_id,
         name=name.strip(),
         description=description.strip(),
         status=status

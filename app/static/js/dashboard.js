@@ -17,6 +17,10 @@ const executionResultContent = document.getElementById("execution-result-content
 
 const historyMessageElement = document.getElementById("history-message");
 const historyTableBody = document.getElementById("history-table-body");
+// Elements used to create a workflow.
+const createWorkflowForm = document.getElementById("create-workflow-form");
+const createWorkflowButton = document.getElementById("create-workflow-button");
+const createWorkflowMessage = document.getElementById("create-workflow-message");
 
 // Store the workflows retrieved from Flask.
 let workflows = [];
@@ -304,6 +308,64 @@ if (executionCard) {
         description.textContent = "For the selected workflow";
     }
 }
+
+
+// Create a workflow through the existing Flask API.
+createWorkflowForm.addEventListener("submit", async event => {
+    // Stop the browser from reloading the page.
+    event.preventDefault();
+
+    const name = document.getElementById("new-workflow-name").value.trim();
+    const description = document.getElementById("new-workflow-description").value.trim();
+    const status = document.getElementById("new-workflow-status").value;
+
+    if (!name) {
+        createWorkflowMessage.textContent = "Please enter a workflow name.";
+        return;
+    }
+
+    createWorkflowButton.disabled = true;
+    createWorkflowButton.textContent = "Creating...";
+    createWorkflowMessage.textContent = "";
+
+    try {
+        const response = await fetch("/api/workflows", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                user_id: 1,
+                name: name,
+                description: description,
+                status: status
+            })
+        });
+
+        const data = await getResponseData(response);
+
+        createWorkflowMessage.textContent =
+            `Workflow "${data.workflow.name}" created successfully.`;
+
+        // Clear the form after successful creation.
+        createWorkflowForm.reset();
+
+        // Reload the list so the new workflow appears.
+        await loadWorkflows();
+
+        // Select the new workflow and load its history.
+        workflowSelectElement.value = String(data.workflow.id);
+        await loadExecutionHistory(data.workflow.id);
+
+    } catch (error) {
+        createWorkflowMessage.textContent =
+            `Could not create workflow: ${error.message}`;
+    } finally {
+        createWorkflowButton.disabled = false;
+        createWorkflowButton.textContent = "Create workflow";
+    }
+});
+
 
 // Load data when the dashboard first opens.
 loadWorkflows();

@@ -1,13 +1,13 @@
-# this route receice the request, validates the email data, find the workflow and delegates the actual work to execute_workflow
 
 from datetime import datetime
 
-from flask import Blueprint, current_app, request
+from flask import Blueprint, current_app, request, session
 
 from app import db
 from app.models.workflow import Workflow
 from app.models.workflow_execution import WorkflowExecution
 from app.services.workflow_engine import execute_workflow
+
 
 executions_bp = Blueprint("executions", __name__)
 
@@ -17,6 +17,21 @@ executions_bp = Blueprint("executions", __name__)
     methods=["POST"]
 )
 def execute_workflow_route(workflow_id):
+    # 1. Require an authenticated user.
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return {
+            "error": "Authentication required. Please log in."
+        }, 401
+
+    # 2. Find the workflow and verify ownership.
+    workflow = db.session.get(Workflow, workflow_id)
+
+    if workflow is None or workflow.user_id != user_id:
+        return {"error": "Workflow not found."}, 404
+
+    # 3. Read and validate the simulated email.
     email = request.get_json(silent=True)
 
     if not isinstance(email, dict):
@@ -28,12 +43,7 @@ def execute_workflow_route(workflow_id):
     if not isinstance(subject, str) or not isinstance(body, str):
         return {"error": "subject and body must be strings."}, 400
 
-    workflow = db.session.get(Workflow, workflow_id)
-
-    if workflow is None:
-        return {"error": "Workflow not found."}, 404
-
-    # 1. Create a history record before executing the workflow.
+    # 4. Create an execution-history record before running.
     execution = WorkflowExecution(
         workflow_id=workflow.id,
         input_data={
@@ -53,10 +63,9 @@ def execute_workflow_route(workflow_id):
         )
         return {"error": "Could not start workflow execution."}, 500
 
-    # Save the ID so we can retrieve this record if execution fails.
     execution_id = execution.id
 
-    # 2. Run the workflow engine and save the outcome.
+    # 5. Run the workflow engine and save the outcome.
     try:
         result = execute_workflow(
             workflow,
@@ -75,11 +84,8 @@ def execute_workflow_route(workflow_id):
     except Exception:
         db.session.rollback()
 
-        current_app.logger.exception(
-            "Workflow execution failed."
-        )
+        current_app.logger.exception("Workflow execution failed.")
 
-        # The initial record was already committed, so retrieve it again.
         execution = db.session.get(
             WorkflowExecution,
             execution_id
@@ -100,7 +106,7 @@ def execute_workflow_route(workflow_id):
             "error": "Workflow execution failed."
         }, 500
 
-    # 3. Return the saved execution result.
+    # 6. Return the saved result.
     return {
         "workflow_id": workflow.id,
         "workflow_name": workflow.name,
@@ -108,26 +114,34 @@ def execute_workflow_route(workflow_id):
         "result": execution.result
     }, 200
 
-    
+
 @executions_bp.route(
     "/api/workflows/<int:workflow_id>/executions",
     methods=["GET"]
 )
 def get_workflow_executions(workflow_id):
-    # 1. Confirm that the workflow exists.
+    # 1. Require an authenticated user.
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return {
+            "error": "Authentication required. Please log in."
+        }, 401
+
+    # 2. Find the workflow and verify ownership.
     workflow = db.session.get(Workflow, workflow_id)
 
-    if workflow is None:
+    if workflow is None or workflow.user_id != user_id:
         return {"error": "Workflow not found."}, 404
 
-    # 2. Retrieve the most recent 50 executions.
+    # 3. Retrieve the 50 most recent executions for this workflow.
     executions = WorkflowExecution.query.filter_by(
-        workflow_id=workflow_id
+        workflow_id=workflow.id
     ).order_by(
         WorkflowExecution.started_at.desc()
     ).limit(50).all()
 
-    # 3. Convert the database records into JSON-friendly data.
+    # 4. Convert database records into JSON-friendly data.
     execution_history = []
 
     for execution in executions:
@@ -147,60 +161,10 @@ def get_workflow_executions(workflow_id):
             )
         })
 
-    # 4. Return the history to the client.
+    # 5. Return the execution history.
     return {
         "workflow_id": workflow.id,
         "workflow_name": workflow.name,
         "count": len(execution_history),
         "executions": execution_history
     }, 200
-
-
-
-
-"""
-#old code
-from flask import Blueprint, request
-from app import db
-from app.models.workflow import Workflow
-from app.services.workflow_engine import execute_workflow
-
-executions_bp = Blueprint("executions", __name__)
-
-
-@executions_bp.route(
-    "/api/workflows/<int:workflow_id>/execute",
-    methods=["POST"]
-)
-def execute_workflow_route(workflow_id):
-    email = request.get_json(silent=True)
-
-    if not isinstance(email, dict):
-        return {"error": "A JSON object is required."}, 400
-
-    subject = email.get("subject", "")
-    body = email.get("body", "")
-
-    if not isinstance(subject, str) or not isinstance(body, str):
-        return {"error": "subject and body must be strings."}, 400
-
-    workflow = db.session.get(Workflow, workflow_id)
-
-    if workflow is None:
-        return {"error": "Workflow not found."}, 404
-
-    result = execute_workflow(
-        workflow,
-        {
-            "subject": subject,
-            "body": body
-        }
-    )
-
-    return {
-        "workflow_id": workflow.id,
-        "workflow_name": workflow.name,
-        "result": result
-    }, 200
-"""
-    

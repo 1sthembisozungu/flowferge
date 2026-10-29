@@ -1,16 +1,12 @@
 
-from flask import Blueprint, request
+from flask import Blueprint, request, session
+
 from app import db
-# import SQLAlchemy database object
 from app.models.workflow import Workflow
 from app.models.workflow_step import WorkflowStep
 
-# workflow model - represent a database table through python
 
 workflow_steps_bp = Blueprint("workflow_steps", __name__)
-
-# blueprint() lets us group releted API routes in a separate file
-# request gives us access to the HTTP request sent by the client
 
 
 @workflow_steps_bp.route(
@@ -18,6 +14,21 @@ workflow_steps_bp = Blueprint("workflow_steps", __name__)
     methods=["POST"]
 )
 def create_workflow_step(workflow_id):
+    # 1. Check whether the user is logged in.
+    user_id = session.get("user_id")
+
+    if user_id is None:
+        return {
+            "error": "Authentication required. Please log in."
+        }, 401
+
+    # 2. Find the workflow.
+    workflow = db.session.get(Workflow, workflow_id)
+
+    if workflow is None or workflow.user_id != user_id:
+        return {"error": "Workflow not found."}, 404
+
+    # 3. Read and validate the request body.
     data = request.get_json(silent=True)
 
     if not isinstance(data, dict):
@@ -37,16 +48,16 @@ def create_workflow_step(workflow_id):
         or not isinstance(step_order, int)
         or step_order < 1
     ):
-        return {"error": "step_order must be a positive integer."}, 400
+        return {
+            "error": "step_order must be a positive integer."
+        }, 400
 
     if not isinstance(configuration, dict):
-        return {"error": "configuration must be a JSON object."}, 400
+        return {
+            "error": "configuration must be a JSON object."
+        }, 400
 
-    workflow = db.session.get(Workflow, workflow_id)
-
-    if workflow is None:
-        return {"error": "Workflow not found."}, 404
-
+    # 4. Prevent duplicate step positions in the workflow.
     existing_step = WorkflowStep.query.filter_by(
         workflow_id=workflow_id,
         step_order=step_order
@@ -57,6 +68,7 @@ def create_workflow_step(workflow_id):
             "error": "This workflow already has a step at that position."
         }, 409
 
+    # 5. Create and save the workflow step.
     step = WorkflowStep(
         workflow_id=workflow_id,
         step_type=step_type,
@@ -71,6 +83,7 @@ def create_workflow_step(workflow_id):
         db.session.rollback()
         raise
 
+    # 6. Return the newly created step.
     return {
         "message": "Workflow step created successfully.",
         "step": {
